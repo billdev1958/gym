@@ -1,0 +1,45 @@
+services:
+  db:
+    build: 
+      context: ./db
+      dockerfile: Dockerfile
+    container_name: gym_db
+    restart: always
+
+    environment:
+      - POSTGRES_DB=gym_db
+      - POSTGRES_USER=bill
+      - POSTGRES_PASSWORD=root
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bill -d gym_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: ./gym
+      target: final-jre-stage
+
+    container_name: gym_app
+    restart: on-failure
+    ports:
+      - "8080:8080"
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    environment:
+        SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/gym_db
+        SPRING_DATASOURCE_USERNAME: bill
+        SPRING_DATASOURCE_PASSWORD: root
+
+volumes:
+  postgres_data:
