@@ -27,6 +27,13 @@ CREATE TABLE IF NOT EXISTS account (
 	deleted_at TIMESTAMPTZ 
 );
 
+CREATE TABLE IF NOT EXISTS memberships(
+	id SERIAL,
+	name VARCHAR(155),
+	description(255),
+	duration VARCHAR(50)
+);
+
 CREATE TABLE IF NOT EXISTS client_membership (
 	id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
 	id_user UUID NOT NULL UNIQUE,
