@@ -30,5 +30,7 @@ public interface ISalesService {
     List<MembershipType> findAllMembershipTypes();
 
     BigDecimal getMembershipCost(Integer membershipTypeId);
+    
+    ClientMembership updateClientMembership(ClientMembership membership);
 
 }
