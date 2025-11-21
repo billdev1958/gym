@@ -2,7 +2,6 @@ package com.ax01.gym.model;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
-import java.time.Duration;
 import java.time.Instant;
 
 /**
@@ -11,7 +10,7 @@ import java.time.Instant;
  */
 
 @Entity
-@Table(name = "membership_type")
+@Table(name = "cat_membership_type")
 public class MembershipType {
 
     @Id
@@ -24,10 +23,10 @@ public class MembershipType {
     @Column(name = "description", length = 255)
     private String description; 
 
-    @Column(name = "duration")
-    private Duration duration; 
+    @Column(name = "duration_days", nullable = false)
+    private Integer durationDays;
     
-    @Column(name = "cost", precision = 15, scale = 2, nullable = false)
+    @Column(name = "cost", precision = 10, scale = 2, nullable = false)
     private BigDecimal cost;
 
     @Column(name = "created_at", updatable = false)
@@ -42,11 +41,11 @@ public class MembershipType {
     public MembershipType() {
     }
 
-    public MembershipType(Integer id, String name, String description, Duration duration, BigDecimal cost, Instant createdAt, Instant updatedAt, Instant deletedAt) {
+    public MembershipType(Integer id, String name, String description, Integer durationDays, BigDecimal cost, Instant createdAt, Instant updatedAt, Instant deletedAt) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.duration = duration;
+        this.durationDays = durationDays;
         this.cost = cost;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -77,12 +76,12 @@ public class MembershipType {
         this.description = description;
     }
 
-    public Duration getDuration() {
-        return duration;
+public Integer getDurationDays() {
+        return durationDays;
     }
 
-    public void setDuration(Duration duration) {
-        this.duration = duration;
+    public void setDurationDays(Integer durationDays) {
+        this.durationDays = durationDays;
     }
     
     public BigDecimal getCost() {

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/main :: layout(~{::title}, ~{::content})}">
+<th:block th:fragment="title">Detalle Admin</th:block>
+
+<div th:fragment="content">
+    
+    <div style="display: flex; align-items: center; margin-bottom: 30px;">
+        <a href="/admins" style="text-decoration: none; color: #86868b; margin-right: 15px; font-size: 20px;">←</a>
+        <h1 style="margin: 0;">Detalle del Usuario</h1>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+        
+        <div style="border: 1px solid #d2d2d7; border-radius: 12px; padding: 25px;">
+            <h3 style="font-size: 14px; text-transform: uppercase; color: #86868b; margin-bottom: 20px; border-bottom: 1px solid #f5f5f7; padding-bottom: 10px;">Información Personal</h3>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-size: 11px; color: #86868b; text-transform: uppercase;">ID Usuario</label>
+                <div style="font-size: 15px;" th:text="${account.user.id}"></div>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-size: 11px; color: #86868b; text-transform: uppercase;">Nombre Completo</label>
+                <div style="font-size: 15px; font-weight: 600;" 
+                     th:text="${account.user.name + ' ' + account.user.lastname1 + ' ' + (account.user.lastname2 ?: '')}"></div>
+            </div>
+
+            <div style="display: flex; gap: 20px;">
+                <div>
+                    <label style="display: block; font-size: 11px; color: #86868b; text-transform: uppercase;">Género</label>
+                    <div style="font-size: 15px;" th:text="${account.user.genre}"></div>
+                </div>
+                <div>
+                    <label style="display: block; font-size: 11px; color: #86868b; text-transform: uppercase;">Rol</label>
+                    <div style="font-size: 15px;" th:text="${account.user.role.name}"></div>
+                </div>
+            </div>
+        </div>
+
+        <div style="border: 1px solid #d2d2d7; border-radius: 12px; padding: 25px;">
+            <h3 style="font-size: 14px; text-transform: uppercase; color: #86868b; margin-bottom: 20px; border-bottom: 1px solid #f5f5f7; padding-bottom: 10px;">Cuenta de Acceso</h3>
+
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-size: 11px; color: #86868b; text-transform: uppercase;">ID Cuenta</label>
+                <div style="font-size: 13px; font-family: monospace;" th:text="${account.id}"></div>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-size: 11px; color: #86868b; text-transform: uppercase;">Correo Electrónico</label>
+                <div style="font-size: 15px;" th:text="${account.email}"></div>
+            </div>
+            
+            <div style="margin-bottom: 15px;">
+                <label style="display: block; font-size: 11px; color: #86868b; text-transform: uppercase;">Fecha Registro</label>
+                <div style="font-size: 15px;" th:text="${#dates.format(account.createdAt, 'dd/MM/yyyy HH:mm')}"></div>
+            </div>
+
+             <div style="margin-top: 20px;">
+                <a th:href="@{/admins/edit/{id}(id=${account.id})}" class="btn-apple">Editar Información</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+</html>

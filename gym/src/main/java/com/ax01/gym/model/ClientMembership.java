@@ -22,8 +22,9 @@ public class ClientMembership {
     @JoinColumn(name = "id_user", nullable = false, unique = true)
     private User user;
 
-    @Column(name = "membership_type")
-    private Integer membershipType;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_membership_type", nullable = false)
+    private MembershipType membershipType;
 
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate; 
@@ -43,7 +44,7 @@ public class ClientMembership {
     public ClientMembership() {
     }
 
-    public ClientMembership(UUID id, User user, Integer membershipType, LocalDate startDate, LocalDate endDate, Instant createdAt, Instant updatedAt, Instant deletedAt) {
+    public ClientMembership(UUID id, User user, MembershipType membershipType, LocalDate startDate, LocalDate endDate, Instant createdAt, Instant updatedAt, Instant deletedAt) {
         this.id = id;
         this.user = user;
         this.membershipType = membershipType;
@@ -70,11 +71,11 @@ public class ClientMembership {
         this.user = user;
     }
 
-    public Integer getMembershipType() {
+    public MembershipType getMembershipType() {
         return membershipType;
     }
 
-    public void setMembershipType(Integer membershipType) {
+    public void setMembershipType(MembershipType membershipType) {
         this.membershipType = membershipType;
     }
 

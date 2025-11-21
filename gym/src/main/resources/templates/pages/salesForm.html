@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/main :: layout(~{::title}, ~{::content})}">
+    
+    <th:block th:fragment="title">Nuevo Cliente - Ax01</th:block>
+
+    <div th:fragment="content">
+        <div class="auth-container" style="max-width: 800px; text-align: left;"> 
+            
+            <div style="margin-bottom: 30px; text-align: center;">
+                <h1>Nuevo Cliente</h1>
+                <p style="color: #86868b;">Registrar datos y procesar venta inicial.</p>
+            </div>
+
+            <form th:action="@{/sales/save}" th:object="${account}" method="post">
+                
+                <h3 style="font-size: 14px; text-transform: uppercase; color: #86868b; border-bottom: 1px solid #d2d2d7; padding-bottom: 10px; margin-bottom: 20px;">Datos del Cliente</h3>
+                <div class="form-group">
+                    <label class="form-label">Nombre</label>
+                    <input type="text" th:field="*{user.name}" class="form-input" placeholder="Nombre(s)" required>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="form-group">
+                        <label class="form-label">Apellido Paterno</label>
+                        <input type="text" th:field="*{user.lastname1}" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Apellido Materno</label>
+                        <input type="text" th:field="*{user.lastname2}" class="form-input">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Género</label>
+                    <select th:field="*{user.genre}" class="form-input" style="background-color: white;">
+                        <option value="M">Masculino</option>
+                        <option value="F">Femenino</option>
+                    </select>
+                </div>
+
+                <h3 style="font-size: 14px; text-transform: uppercase; color: #86868b; border-bottom: 1px solid #d2d2d7; padding-bottom: 10px; margin-bottom: 20px; margin-top: 30px;">Suscripción y Pago</h3>
+
+                <div style="background-color: #f5f5f7; padding: 25px; border-radius: 12px; border: 1px solid #d2d2d7;">
+                    
+                    <div class="form-group">
+                        <label class="form-label">Seleccionar Plan</label>
+                        <select id="membershipSelect" name="membershipTypeId" class="form-input" style="background-color: white;" required onchange="updateInfo()">
+                            <option value="" data-cost="0" data-desc="Seleccione un plan" data-duration="-" disabled selected>-- Elige una Membresía --</option>
+                            <option th:each="type : ${membershipTypes}" 
+                                    th:value="${type.id}" 
+                                    th:data-cost="${type.cost}"
+                                    th:data-desc="${type.description}"
+                                    th:data-duration="${type.durationDays}"
+                                    th:text="${type.name}">Gold</option>
+                        </select>
+                    </div>
+
+                    <div id="infoBox" style="background: white; border: 1px solid #e5e5e5; border-radius: 8px; padding: 15px; margin-bottom: 20px; display: none;">
+                        <div style="font-size: 14px; font-weight: 600; color: #1d1d1f; margin-bottom: 5px;">Detalles del Plan:</div>
+                        <div id="descDisplay" style="font-size: 13px; color: #86868b; margin-bottom: 8px;"></div>
+                        <div style="font-size: 12px; color: #1d1d1f;">
+                            <span style="font-weight: 600;">Duración:</span> <span id="durationDisplay"></span> días
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: end;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">Método de Pago</label>
+                            <select name="paymentMethod" class="form-input" style="background-color: white;">
+                                <option value="CASH">Efectivo</option>
+                                <option value="CARD">Tarjeta</option>
+                                <option value="TRANSFER">Transferencia</option>
+                            </select>
+                        </div>
+                        
+                        <div style="text-align: right;">
+                            <div style="font-size: 12px; text-transform: uppercase; color: #86868b; margin-bottom: 5px;">Total a Pagar</div>
+                            <div id="totalDisplay" style="font-size: 32px; font-weight: 700; color: #1d1d1f;">$0.00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 style="font-size: 14px; text-transform: uppercase; color: #86868b; border-bottom: 1px solid #d2d2d7; padding-bottom: 10px; margin-bottom: 20px; margin-top: 30px;">Cuenta de Acceso (App)</h3>
+                <div class="form-group">
+                    <label class="form-label">Correo Electrónico</label>
+                    <input type="email" th:field="*{email}" class="form-input" placeholder="cliente@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Contraseña</label>
+                    <input type="password" th:field="*{password}" class="form-input" placeholder="••••••••" required>
+                </div>
+
+                <div style="margin-top: 2rem; display: flex; gap: 15px;">
+                    <button type="submit" class="btn-apple">Cobrar y Registrar</button>
+                    <a href="/clients" class="btn-apple" style="background-color: #f5f5f7; color: #1d1d1f; text-decoration: none; text-align: center; line-height: 50px;">Cancelar</a>
+                </div>
+
+            </form>
+        </div>
+
+        <script th:inline="javascript">
+            function updateInfo() {
+                const select = document.getElementById('membershipSelect');
+                if (select.selectedIndex === -1) return;
+
+                const selectedOption = select.options[select.selectedIndex];
+                
+                const cost = selectedOption.getAttribute('data-cost') || 0;
+                const desc = selectedOption.getAttribute('data-desc') || '';
+                const duration = selectedOption.getAttribute('data-duration') || '';
+                
+                const costNumber = parseFloat(cost);
+                const formatter = new Intl.NumberFormat('es-MX', {
+                    style: 'currency',
+                    currency: 'MXN'
+                });
+                
+                document.getElementById('totalDisplay').textContent = formatter.format(costNumber);
+
+                const infoBox = document.getElementById('infoBox');
+                if (desc && desc !== 'Seleccione un plan') {
+                    document.getElementById('descDisplay').textContent = desc;
+                    document.getElementById('durationDisplay').textContent = duration;
+                    infoBox.style.display = 'block'; 
+                } else {
+                    infoBox.style.display = 'none'; 
+                }
+            }
+
+            setTimeout(updateInfo, 100);
+        </script>
+    </div>
+    </html>

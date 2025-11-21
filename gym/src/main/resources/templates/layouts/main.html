@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<!-- Agregamos el namespace de seguridad (sec) -->
+<html lang="es" 
+      xmlns:th="http://www.thymeleaf.org" 
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      th:fragment="layout(title, content)">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title th:replace="${title}">Ax01 Systems</title>
+
+        <link rel="stylesheet" th:href="@{/css/styles.css}">
+        <script th:src="@{/js/htmx.min.js}" defer></script>
+    </head>
+    <body>
+
+        <header>
+            <div style="width: 100%; max-width: 1440px; margin: 0 auto; padding: 0 20px; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 600; color: white;">Ax01 Systems</span>
+
+                <div sec:authorize="isAuthenticated()" style="font-size: 12px; color: #86868b;">
+                    Hola, <span sec:authentication="name" style="color: white;">Usuario</span>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <div class="app-container">
+
+                <aside class="sidebar" sec:authorize="isAuthenticated()">
+
+                    <ul class="sidebar-menu">
+                        <li class="menu-label">General</li>
+
+                        <li>
+                            <a href="/admins" class="nav-link">
+                                Panel Administrador
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="/clients" class="nav-link">
+                                Ventas
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="/memberships" class="nav-link">
+                                Catálogo Membresías
+                            </a>
+                        </li>
+
+                    </ul>
+
+                    <div class="logout-form">
+                        <form th:action="@{/logout}" method="post">
+                            <button type="submit" class="btn-logout">
+                                Cerrar Sesión
+                            </button>
+                        </form>
+                    </div>
+                </aside>
+
+
+                <div class="page-content" 
+                     th:classappend="${#authorization.expression('!isAuthenticated()')} ? 'centered' : ''">
+
+                    <div th:replace="${content}"></div>
+
+                </div>
+
+            </div>
+        </main>
+
+        <!-- FOOTER -->
+        <footer>
+            <div class="footer-content" style="max-width: 1440px;">
+                <p>Copyright © 2025 Ax01 Systems.</p>
+            </div>
+        </footer>
+
+    </body>
+</html>

@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -37,16 +38,20 @@ public class SalesServiceImpl implements ISalesService {
     private final IClientJpaMembershipJpaRepository clientMembershipRepository;
     private final ICatRoleJpaRepository catRoleRepository;
     private final IMembershipTypeJpaRepository membershipTypeRepository; 
+    private final PasswordEncoder passwordEncoder;
 
-    public SalesServiceImpl(IUsersJpaRepository userRepository, IAccountJpaRepository accountRepository, 
-                             IClientJpaMembershipJpaRepository clientMembershipRepository, 
-                             ICatRoleJpaRepository catRoleRepository, 
-                             IMembershipTypeJpaRepository membershipTypeRepository) {
+    public SalesServiceImpl(IUsersJpaRepository userRepository, 
+                            IAccountJpaRepository accountRepository, 
+                            IClientJpaMembershipJpaRepository clientMembershipRepository, 
+                            ICatRoleJpaRepository catRoleRepository, 
+                            IMembershipTypeJpaRepository membershipTypeRepository,
+                            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.accountRepository = accountRepository;
         this.clientMembershipRepository = clientMembershipRepository;
         this.catRoleRepository = catRoleRepository;
         this.membershipTypeRepository = membershipTypeRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     private Optional<CatRole> findRoleByName(String roleName) {
@@ -60,52 +65,62 @@ public class SalesServiceImpl implements ISalesService {
         MembershipType type = membershipTypeRepository.findById(membershipTypeId)
                 .orElseThrow(() -> new RuntimeException("El tipo de membresía seleccionado no existe."));
         
+
         CatRole clientRole = findRoleByName(RoleEnum.CLIENTE.getName())
                 .orElseThrow(() -> new RuntimeException("Error: El rol CLIENTE no existe."));
         
         user.setRole(clientRole);
         
+        if(user.getCreatedAt() == null) user.setCreatedAt(Instant.now());
+        
         User savedUser = userRepository.save(user);
 
         account.setUser(savedUser); 
+        account.setPassword(passwordEncoder.encode(account.getPassword()));
+        if(account.getCreatedAt() == null) account.setCreatedAt(Instant.now());
+        
         accountRepository.save(account);
 
         ClientMembership newMembership = new ClientMembership();
         newMembership.setUser(savedUser);
         
+        newMembership.setMembershipType(type); 
+        
         LocalDate startDate = LocalDate.now();
-        newMembership.setMembershipType(type.getId()); 
         newMembership.setStartDate(startDate);
         
-        newMembership.setEndDate(startDate.plus(type.getDuration())); 
+        newMembership.setEndDate(startDate.plusDays(type.getDurationDays())); 
+
+        if(newMembership.getCreatedAt() == null) newMembership.setCreatedAt(Instant.now());
 
         clientMembershipRepository.save(newMembership);
 
         return savedUser;
     }
 
-    @Override
+@Override
     @Transactional
     public ClientMembership renewClientMembership(UUID userId, Integer membershipTypeId) {
         
-        MembershipType newType = membershipTypeRepository.findById(membershipTypeId)
-                .orElseThrow(() -> new RuntimeException("El tipo de membresía no existe."));
-        
         ClientMembership existingMembership = clientMembershipRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("No se encontró la membresía del cliente para renovar."));
+                .orElseThrow(() -> new RuntimeException("No se encontró la membresía del cliente."));
 
         LocalDate today = LocalDate.now();
 
-        LocalDate renewalStart = existingMembership.getEndDate().isBefore(today) 
-                                 ? today 
-                                 : existingMembership.getEndDate().plusDays(1);
-        
-        LocalDate renewalEnd = renewalStart.plus(newType.getDuration());
+        if (!existingMembership.getEndDate().isBefore(today)) {
+            throw new RuntimeException("La membresía aún está vigente. Solo se puede renovar después de su vencimiento (" + existingMembership.getEndDate() + ").");
+        }
 
-        existingMembership.setMembershipType(newType.getId());
+        MembershipType newType = membershipTypeRepository.findById(membershipTypeId)
+                .orElseThrow(() -> new RuntimeException("El tipo de membresía no existe."));
+
+        LocalDate renewalStart = today;
+        LocalDate renewalEnd = renewalStart.plusDays(newType.getDurationDays());
+
+        existingMembership.setMembershipType(newType);
         existingMembership.setStartDate(renewalStart);
         existingMembership.setEndDate(renewalEnd);
-
+        existingMembership.setDeletedAt(null); 
         existingMembership.setUpdatedAt(Instant.now());
         
         return clientMembershipRepository.save(existingMembership);
@@ -121,14 +136,15 @@ public class SalesServiceImpl implements ISalesService {
         return clientMembershipRepository.save(membership);
     } 
 
-    @Override
+@Override
     @Transactional
     public void cancelClientMembership(UUID userId) {
         ClientMembership membership = clientMembershipRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("No se encontró la membresía a cancelar."));
         
         membership.setDeletedAt(Instant.now());
-        membership.setEndDate(LocalDate.now()); 
+        
+        membership.setEndDate(LocalDate.now().minusDays(1)); 
         
         clientMembershipRepository.save(membership);
     }

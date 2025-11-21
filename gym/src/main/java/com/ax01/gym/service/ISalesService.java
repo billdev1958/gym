@@ -12,11 +12,13 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.stereotype.Repository;
 
 /**
  *
  * @author bill
  */
+@Repository
 public interface ISalesService {
 
     User registerNewClientAndPurchase(User user, Account account, Integer membershipTypeId);

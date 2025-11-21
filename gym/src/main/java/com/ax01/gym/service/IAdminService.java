@@ -9,23 +9,27 @@ import com.ax01.gym.model.CatRole;
 import com.ax01.gym.model.User;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.stereotype.Repository;
 
 /**
  *
  * @author bill
  */
+@Repository
 public interface IAdminService {
-    
+
     User registerNewAdmin(User user, Account account);
-    
-    User updateAdmin(User user, Account account); 
-    
+
+    User updateAdmin(User user, Account account);
+
     void permanentlyDeleteUser(UUID userId);
-    
+
     List<User> findUsersByNameAndLastname(String name, String lastname1);
 
     List<User> findAllUsers();
-    
-    List<CatRole>findAllRoles();
+
+    List<Account> findAllAdmins();
+
+    List<CatRole> findAllRoles();
 
 }

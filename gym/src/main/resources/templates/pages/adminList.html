@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html th:replace="~{layouts/main :: layout(~{::title}, ~{::content})}">
+<th:block th:fragment="title">Administradores</th:block>
+
+<div th:fragment="content">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div>
+            <h1>Administradores</h1>
+            <p style="color: #86868b;">Gestión de usuarios del sistema.</p>
+        </div>
+        <a href="/admins/new" class="btn-apple" style="width: auto; padding: 0 20px;">+ Nuevo</a>
+    </div>
+
+    <div style="border: 1px solid #d2d2d7; border-radius: 12px; overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead style="background-color: #f5f5f7; border-bottom: 1px solid #d2d2d7;">
+                <tr>
+                    <th style="padding: 15px; text-align: left; font-size: 12px; color: #86868b; text-transform: uppercase;">Nombre</th>
+                    <th style="padding: 15px; text-align: left; font-size: 12px; color: #86868b; text-transform: uppercase;">Email</th>
+                    <th style="padding: 15px; text-align: center; font-size: 12px; color: #86868b; text-transform: uppercase;">Rol</th>
+                    <th style="padding: 15px; text-align: right; font-size: 12px; color: #86868b; text-transform: uppercase;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="acc : ${accounts}" style="border-bottom: 1px solid #f5f5f7;">
+                    <td style="padding: 15px; font-weight: 600;" 
+                        th:text="${acc.user.name + ' ' + acc.user.lastname1}"></td>
+                    
+                    <td style="padding: 15px;" th:text="${acc.email}"></td>
+                    
+                    <td style="padding: 15px; text-align: center;">
+                        <span style="background: #e5e5ea; color: #1d1d1f; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;" 
+                              th:text="${acc.user.role.name}">ADMIN</span>
+                    </td>
+
+                    <td style="padding: 15px; text-align: right; white-space: nowrap;">
+                        <a th:href="@{/admins/details/{id}(id=${acc.id})}" 
+                           style="text-decoration: none; color: #0071e3; margin-right: 15px; font-size: 14px;">Ver</a>
+
+                        <a th:href="@{/admins/edit/{id}(id=${acc.id})}" 
+                           style="text-decoration: none; color: #0071e3; margin-right: 15px; font-size: 14px;">Editar</a>
+
+                        <form th:action="@{/admins/delete/{id}(id=${acc.user.id})}" method="post" style="display: inline;">
+                            <button type="submit" 
+                                    onclick="return confirm('¿Eliminar permanentemente?');"
+                                    style="background: none; border: none; color: #ff3b30; cursor: pointer; font-size: 14px;">
+                                Eliminar
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${accounts.empty}">
+                    <td colspan="4" style="padding: 40px; text-align: center; color: #86868b;">
+                        No se encontraron administradores.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</html>
